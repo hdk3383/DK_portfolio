@@ -5,11 +5,13 @@ import requests
 import datetime, time
 import csv, itertools
 import pandas as pd
+import sys
+import json
 
 from class_Unixtime import unixtime
 
-stock_data = input("* 포트폴리오 회사 입력 ex)AAPL,PG,XOM : ").split(',')
-
+# stock_data = input("* 포트폴리오 회사 입력 ex)AAPL,PG,XOM : ").split(',')
+stock_data = sys.argv[1].split(',')
 df_list = []
 
 def getdatetime(input_value, df_list):
@@ -74,7 +76,7 @@ from pypfopt import expected_returns
 
 # Read in price data
 df_total = pd.read_csv("output.csv", parse_dates=True, index_col="date")
-print(df_total)
+# print(df_total)
 
 # Calculate expected returns and sample covariance
 mu = expected_returns.mean_historical_return(df_total)
@@ -85,5 +87,13 @@ ef = EfficientFrontier(mu, S)
 raw_weights = ef.max_sharpe()
 cleaned_weights = ef.clean_weights()
 ef.save_weights_to_file("output_weights.csv")  # saves to file
+cleaned_weights = json.dumps(cleaned_weights)
+cleaned_weights = cleaned_weights.replace("|", "")
+cleaned_weights = cleaned_weights.replace('"', "")
+cleaned_weights = cleaned_weights.replace("{", "")
+cleaned_weights = cleaned_weights.replace("}", "")
+cleaned_weights = cleaned_weights.replace("'", "")
+cleaned_weights = cleaned_weights.replace("[", "")
+cleaned_weights = cleaned_weights.replace("]", "")
 print(cleaned_weights)
 ef.portfolio_performance(verbose = True)
